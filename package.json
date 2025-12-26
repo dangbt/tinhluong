@@ -15,7 +15,7 @@
     "dev": "vite --port 3000",
     "build": "vite build && tsc",
     "preview": "vite preview",
-    "deploy": "pnpm run build && npx wrangler pages deploy --assets dist",
+    "deploy": "pnpm run build && npx wrangler pages deploy dist",
     "test": "vitest run",
     "lint": "eslint",
     "format": "prettier",
