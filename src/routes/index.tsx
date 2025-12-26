@@ -90,6 +90,9 @@ function TinhLuongGrossNetPage() {
   const [salaryType, setSalaryType] = useState<'gross' | 'net'>('gross')
   const [salaryAmount, setSalaryAmount] = useState<string>('')
   const [soNguoiPhuThuoc, setSoNguoiPhuThuoc] = useState<string>('0')
+  const [useCustomInsurance, setUseCustomInsurance] = useState<boolean>(false)
+  const [customInsuranceAmount, setCustomInsuranceAmount] = useState<string>('')
+  const [insuranceOnOfficialSalary, setInsuranceOnOfficialSalary] = useState<boolean>(false)
 
   const soNguoiPhuThuocNum = parseInt(soNguoiPhuThuoc) || 0
   const salaryNum = parseFloat(salaryAmount) || 0
@@ -112,55 +115,117 @@ function TinhLuongGrossNetPage() {
 
     if (salaryType === 'gross') {
       grossSalary = salaryNum
-      bhxh = grossSalary * BHXH_RATE
-      bhyt = grossSalary * BHYT_RATE
-      bhtn = grossSalary * BHTN_RATE
-      totalInsurance = bhxh + bhyt + bhtn
+      // Sử dụng số tiền nhập vào hoặc tính tự động
+      if (useCustomInsurance) {
+        const customAmount = parseFloat(customInsuranceAmount) || 0
+        if (insuranceOnOfficialSalary) {
+          // Tính bảo hiểm theo % trên lương chính thức (số tiền user nhập)
+          bhxh = customAmount * BHXH_RATE
+          bhyt = customAmount * BHYT_RATE
+          bhtn = customAmount * BHTN_RATE
+          totalInsurance = bhxh + bhyt + bhtn
+        } else {
+          // Số tiền user nhập là cơ sở tính bảo hiểm, tính theo % trực tiếp
+          bhxh = customAmount * BHXH_RATE
+          bhyt = customAmount * BHYT_RATE
+          bhtn = customAmount * BHTN_RATE
+          totalInsurance = bhxh + bhyt + bhtn
+        }
+      } else {
+        bhxh = grossSalary * BHXH_RATE
+        bhyt = grossSalary * BHYT_RATE
+        bhtn = grossSalary * BHTN_RATE
+        totalInsurance = bhxh + bhyt + bhtn
+      }
 
       giamTruGiaCanh = GIAM_TRU_BAN_THAN + soNguoiPhuThuocNum * GIAM_TRU_NGUOI_PHU_THUOC
       thuNhapChiuThue = Math.max(0, grossSalary - totalInsurance - giamTruGiaCanh)
       thueTNCN = calculateTax(thuNhapChiuThue, TAX_BRACKETS_2026)
       netSalary = grossSalary - totalInsurance - thueTNCN
     } else {
-      // Tính ngược từ Net sang Gross (phức tạp hơn vì thuế phụ thuộc vào gross)
-      // Sử dụng phương pháp lặp để tìm gross
-      netSalary = salaryNum
-      let estimatedGross = netSalary / (1 - TOTAL_INSURANCE_RATE - 0.1) // Ước tính ban đầu
+      // Khi nhập lương Net: số tiền nhập là lương Net cũ
+      // Tính Gross từ Net cũ (theo chính sách cũ), sau đó tính Net mới (theo chính sách mới 2026)
+      const oldNetSalary = salaryNum
+      
+      // Bước 1: Tính Gross từ Net cũ theo chính sách cũ
+      let estimatedGross = oldNetSalary / (1 - TOTAL_INSURANCE_RATE - 0.1) // Ước tính ban đầu
       let iterations = 0
       const maxIterations = 100
       const tolerance = 1000 // Độ chính xác 1000 đồng
 
       while (iterations < maxIterations) {
-        bhxh = estimatedGross * BHXH_RATE
-        bhyt = estimatedGross * BHYT_RATE
-        bhtn = estimatedGross * BHTN_RATE
-        totalInsurance = bhxh + bhyt + bhtn
+        // Tính bảo hiểm theo chính sách cũ
+        let oldBhxh: number
+        let oldBhyt: number
+        let oldBhtn: number
+        let oldTotalInsurance: number
+        
+        if (useCustomInsurance) {
+          const customAmount = parseFloat(customInsuranceAmount) || 0
+          if (insuranceOnOfficialSalary) {
+            oldBhxh = customAmount * BHXH_RATE
+            oldBhyt = customAmount * BHYT_RATE
+            oldBhtn = customAmount * BHTN_RATE
+            oldTotalInsurance = oldBhxh + oldBhyt + oldBhtn
+          } else {
+            oldBhxh = customAmount * BHXH_RATE
+            oldBhyt = customAmount * BHYT_RATE
+            oldBhtn = customAmount * BHTN_RATE
+            oldTotalInsurance = oldBhxh + oldBhyt + oldBhtn
+          }
+        } else {
+          oldBhxh = estimatedGross * BHXH_RATE
+          oldBhyt = estimatedGross * BHYT_RATE
+          oldBhtn = estimatedGross * BHTN_RATE
+          oldTotalInsurance = oldBhxh + oldBhyt + oldBhtn
+        }
 
-        giamTruGiaCanh = GIAM_TRU_BAN_THAN + soNguoiPhuThuocNum * GIAM_TRU_NGUOI_PHU_THUOC
-        thuNhapChiuThue = Math.max(0, estimatedGross - totalInsurance - giamTruGiaCanh)
-        thueTNCN = calculateTax(thuNhapChiuThue, TAX_BRACKETS_2026)
+        const oldGiamTruGiaCanh =
+          GIAM_TRU_BAN_THAN_OLD + soNguoiPhuThuocNum * GIAM_TRU_NGUOI_PHU_THUOC_OLD
+        const oldThuNhapChiuThue = Math.max(0, estimatedGross - oldTotalInsurance - oldGiamTruGiaCanh)
+        const oldThueTNCN = calculateTax(oldThuNhapChiuThue, TAX_BRACKETS_OLD)
 
-        const calculatedNet = estimatedGross - totalInsurance - thueTNCN
-        const difference = Math.abs(calculatedNet - netSalary)
+        const calculatedOldNet = estimatedGross - oldTotalInsurance - oldThueTNCN
+        const difference = Math.abs(calculatedOldNet - oldNetSalary)
 
         if (difference < tolerance) {
           break
         }
 
         // Điều chỉnh ước tính
-        const adjustment = (netSalary - calculatedNet) / (1 - TOTAL_INSURANCE_RATE)
+        const adjustment = (oldNetSalary - calculatedOldNet) / (1 - TOTAL_INSURANCE_RATE)
         estimatedGross += adjustment
         iterations++
       }
 
       grossSalary = estimatedGross
-      bhxh = grossSalary * BHXH_RATE
-      bhyt = grossSalary * BHYT_RATE
-      bhtn = grossSalary * BHTN_RATE
-      totalInsurance = bhxh + bhyt + bhtn
+
+      // Bước 2: Từ Gross đã tính, tính Net mới theo chính sách mới 2026
+      if (useCustomInsurance) {
+        const customAmount = parseFloat(customInsuranceAmount) || 0
+        if (insuranceOnOfficialSalary) {
+          // Tính bảo hiểm theo % trên lương chính thức
+          bhxh = customAmount * BHXH_RATE
+          bhyt = customAmount * BHYT_RATE
+          bhtn = customAmount * BHTN_RATE
+          totalInsurance = bhxh + bhyt + bhtn
+        } else {
+          // Số tiền user nhập là cơ sở tính bảo hiểm, tính theo % trực tiếp
+          bhxh = customAmount * BHXH_RATE
+          bhyt = customAmount * BHYT_RATE
+          bhtn = customAmount * BHTN_RATE
+          totalInsurance = bhxh + bhyt + bhtn
+        }
+      } else {
+        bhxh = grossSalary * BHXH_RATE
+        bhyt = grossSalary * BHYT_RATE
+        bhtn = grossSalary * BHTN_RATE
+        totalInsurance = bhxh + bhyt + bhtn
+      }
       giamTruGiaCanh = GIAM_TRU_BAN_THAN + soNguoiPhuThuocNum * GIAM_TRU_NGUOI_PHU_THUOC
       thuNhapChiuThue = Math.max(0, grossSalary - totalInsurance - giamTruGiaCanh)
       thueTNCN = calculateTax(thuNhapChiuThue, TAX_BRACKETS_2026)
+      netSalary = grossSalary - totalInsurance - thueTNCN
     }
 
     return {
@@ -174,17 +239,39 @@ function TinhLuongGrossNetPage() {
       thuNhapChiuThue,
       thueTNCN,
     }
-  }, [salaryNum, salaryType, soNguoiPhuThuocNum])
+  }, [salaryNum, salaryType, soNguoiPhuThuocNum, useCustomInsurance, customInsuranceAmount, insuranceOnOfficialSalary])
 
   // Tính toán theo chính sách cũ (để so sánh)
   const calculationsOld = useMemo(() => {
     if (!calculations) return null
 
     const grossSalary = calculations.grossSalary
-    const bhxh = grossSalary * BHXH_RATE
-    const bhyt = grossSalary * BHYT_RATE
-    const bhtn = grossSalary * BHTN_RATE
-    const totalInsurance = bhxh + bhyt + bhtn
+    // Sử dụng số tiền nhập vào hoặc tính tự động
+    let bhxh: number
+    let bhyt: number
+    let bhtn: number
+    let totalInsurance: number
+    if (useCustomInsurance) {
+      const customAmount = parseFloat(customInsuranceAmount) || 0
+      if (insuranceOnOfficialSalary) {
+        // Tính bảo hiểm theo % trên lương chính thức
+        bhxh = customAmount * BHXH_RATE
+        bhyt = customAmount * BHYT_RATE
+        bhtn = customAmount * BHTN_RATE
+        totalInsurance = bhxh + bhyt + bhtn
+      } else {
+        // Số tiền user nhập là cơ sở tính bảo hiểm, tính theo % trực tiếp
+        bhxh = customAmount * BHXH_RATE
+        bhyt = customAmount * BHYT_RATE
+        bhtn = customAmount * BHTN_RATE
+        totalInsurance = bhxh + bhyt + bhtn
+      }
+    } else {
+      bhxh = grossSalary * BHXH_RATE
+      bhyt = grossSalary * BHYT_RATE
+      bhtn = grossSalary * BHTN_RATE
+      totalInsurance = bhxh + bhyt + bhtn
+    }
 
     const giamTruGiaCanh =
       GIAM_TRU_BAN_THAN_OLD + soNguoiPhuThuocNum * GIAM_TRU_NGUOI_PHU_THUOC_OLD
@@ -203,7 +290,7 @@ function TinhLuongGrossNetPage() {
       thuNhapChiuThue,
       thueTNCN,
     }
-  }, [calculations, soNguoiPhuThuocNum])
+  }, [calculations, soNguoiPhuThuocNum, useCustomInsurance, customInsuranceAmount, insuranceOnOfficialSalary])
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -222,7 +309,7 @@ function TinhLuongGrossNetPage() {
           
           {/* Header card */}
           <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/50 p-8 md:p-12">
-            <div className="text-center">
+    <div className="text-center">
               {/* Icon với animation và glow effect */}
               <div className="flex justify-center mb-6">
                 <div className="relative">
@@ -309,10 +396,76 @@ function TinhLuongGrossNetPage() {
                 </p>
               </div>
 
+              {/* Tùy chọn nhập số tiền bảo hiểm */}
+              <div className="space-y-4 pt-4 border-t">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="useCustomInsurance"
+                    checked={useCustomInsurance}
+                    onChange={(e) => setUseCustomInsurance(e.target.checked)}
+                    className="rounded"
+                  />
+                  <Label htmlFor="useCustomInsurance" className="text-sm font-medium cursor-pointer">
+                    Nhập số tiền bảo hiểm thủ công
+                  </Label>
+                </div>
+                <p className="text-xs text-gray-500">
+                  Nếu không chọn, sẽ tính tự động theo tỷ lệ: BHXH 8%, BHYT 1.5%, BHTN 1%
+                </p>
+
+                {useCustomInsurance && (
+                  <div className="space-y-3 pl-6 border-l-2 border-purple-200">
+                    <div className="flex items-center space-x-2 mb-3">
+                      <input
+                        type="checkbox"
+                        id="insuranceOnOfficialSalary"
+                        checked={insuranceOnOfficialSalary}
+                        onChange={(e) => setInsuranceOnOfficialSalary(e.target.checked)}
+                        className="rounded"
+                      />
+                      <Label
+                        htmlFor="insuranceOnOfficialSalary"
+                        className="text-sm font-medium cursor-pointer"
+                      >
+                        Trên lương chính thức
+                      </Label>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="customInsuranceAmount" className="text-sm">
+                        {insuranceOnOfficialSalary
+                          ? 'Lương chính thức (đồng)'
+                          : 'Tổng số tiền đóng bảo hiểm (đồng)'}
+                      </Label>
+                      <Input
+                        id="customInsuranceAmount"
+                        type="number"
+                        value={customInsuranceAmount}
+                        onChange={(e) => setCustomInsuranceAmount(e.target.value)}
+                        placeholder={
+                          insuranceOnOfficialSalary
+                            ? 'Nhập lương chính thức'
+                            : 'Nhập tổng số tiền bảo hiểm'
+                        }
+                        min="0"
+                      />
+                      <p className="text-xs text-gray-500">
+                        {insuranceOnOfficialSalary
+                          ? `Bảo hiểm sẽ được tính theo % trên lương chính thức: BHXH ${(BHXH_RATE * 100).toFixed(1)}%, BHYT ${(BHYT_RATE * 100).toFixed(1)}%, BHTN ${(BHTN_RATE * 100).toFixed(1)}%`
+                          : `Số tiền này là cơ sở tính bảo hiểm. Bảo hiểm = Số tiền × Tỷ lệ: BHXH ${(BHXH_RATE * 100).toFixed(1)}%, BHYT ${(BHYT_RATE * 100).toFixed(1)}%, BHTN ${(BHTN_RATE * 100).toFixed(1)}%`}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <Button
                 onClick={() => {
                   setSalaryAmount('')
                   setSoNguoiPhuThuoc('0')
+                  setUseCustomInsurance(false)
+                  setCustomInsuranceAmount('')
+                  setInsuranceOnOfficialSalary(false)
                 }}
                 variant="outline"
                 className="w-full"
@@ -352,22 +505,45 @@ function TinhLuongGrossNetPage() {
                     {calculationsOld && (
                       <div className="grid grid-cols-2 gap-4">
                         <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                          <p className="text-sm text-gray-600 mb-1">Lương Net (Cũ)</p>
+                          <p className="text-sm text-gray-600 mb-1">
+                            {salaryType === 'net' && salaryNum > 0
+                              ? 'Lương Net (Cũ - Đã nhập)'
+                              : 'Lương Net (Cũ - Tính toán)'}
+                          </p>
                           <p className="text-2xl font-bold text-gray-700">
-                            {formatCurrency(calculationsOld.netSalary)}
+                            {formatCurrency(
+                              salaryType === 'net' && salaryNum > 0
+                                ? salaryNum
+                                : calculationsOld.netSalary
+                            )}
                           </p>
                         </div>
                         <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
                           <p className="text-sm text-gray-600 mb-1">Chênh lệch</p>
                           <p
                             className={`text-2xl font-bold ${
-                              calculations.netSalary - calculationsOld.netSalary >= 0
+                              calculations.netSalary -
+                                (salaryType === 'net' && salaryNum > 0
+                                  ? salaryNum
+                                  : calculationsOld.netSalary) >=
+                              0
                                 ? 'text-green-600'
                                 : 'text-red-600'
                             }`}
                           >
-                            {calculations.netSalary - calculationsOld.netSalary >= 0 ? '+' : ''}
-                            {formatCurrency(calculations.netSalary - calculationsOld.netSalary)}
+                            {calculations.netSalary -
+                              (salaryType === 'net' && salaryNum > 0
+                                ? salaryNum
+                                : calculationsOld.netSalary) >=
+                            0
+                              ? '+'
+                              : ''}
+                            {formatCurrency(
+                              calculations.netSalary -
+                                (salaryType === 'net' && salaryNum > 0
+                                  ? salaryNum
+                                  : calculationsOld.netSalary)
+                            )}
                           </p>
                         </div>
                       </div>
@@ -541,14 +717,27 @@ function TinhLuongGrossNetPage() {
                                 <span className="text-sm">Lương Net:</span>
                                 <span
                                   className={`font-semibold ${
-                                    calculations.netSalary - calculationsOld.netSalary >= 0
+                                    calculations.netSalary -
+                                      (salaryType === 'net' && salaryNum > 0
+                                        ? salaryNum
+                                        : calculationsOld.netSalary) >=
+                                    0
                                       ? 'text-green-600'
                                       : 'text-red-600'
                                   }`}
                                 >
-                                  {calculations.netSalary - calculationsOld.netSalary >= 0 ? '+' : ''}
+                                  {calculations.netSalary -
+                                    (salaryType === 'net' && salaryNum > 0
+                                      ? salaryNum
+                                      : calculationsOld.netSalary) >=
+                                  0
+                                    ? '+'
+                                    : ''}
                                   {formatCurrency(
-                                    calculations.netSalary - calculationsOld.netSalary
+                                    calculations.netSalary -
+                                      (salaryType === 'net' && salaryNum > 0
+                                        ? salaryNum
+                                        : calculationsOld.netSalary)
                                   )}
                                 </span>
                               </div>
