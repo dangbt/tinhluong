@@ -10,17 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TinhLuongGrossNetRouteImport } from './routes/tinh-luong-gross-net'
-import { Route as TinhLuongRouteImport } from './routes/tinh-luong'
 import { Route as IndexRouteImport } from './routes/index'
 
 const TinhLuongGrossNetRoute = TinhLuongGrossNetRouteImport.update({
   id: '/tinh-luong-gross-net',
   path: '/tinh-luong-gross-net',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TinhLuongRoute = TinhLuongRouteImport.update({
-  id: '/tinh-luong',
-  path: '/tinh-luong',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -31,31 +25,27 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/tinh-luong': typeof TinhLuongRoute
   '/tinh-luong-gross-net': typeof TinhLuongGrossNetRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/tinh-luong': typeof TinhLuongRoute
   '/tinh-luong-gross-net': typeof TinhLuongGrossNetRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/tinh-luong': typeof TinhLuongRoute
   '/tinh-luong-gross-net': typeof TinhLuongGrossNetRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/tinh-luong' | '/tinh-luong-gross-net'
+  fullPaths: '/' | '/tinh-luong-gross-net'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/tinh-luong' | '/tinh-luong-gross-net'
-  id: '__root__' | '/' | '/tinh-luong' | '/tinh-luong-gross-net'
+  to: '/' | '/tinh-luong-gross-net'
+  id: '__root__' | '/' | '/tinh-luong-gross-net'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  TinhLuongRoute: typeof TinhLuongRoute
   TinhLuongGrossNetRoute: typeof TinhLuongGrossNetRoute
 }
 
@@ -66,13 +56,6 @@ declare module '@tanstack/react-router' {
       path: '/tinh-luong-gross-net'
       fullPath: '/tinh-luong-gross-net'
       preLoaderRoute: typeof TinhLuongGrossNetRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/tinh-luong': {
-      id: '/tinh-luong'
-      path: '/tinh-luong'
-      fullPath: '/tinh-luong'
-      preLoaderRoute: typeof TinhLuongRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -87,7 +70,6 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  TinhLuongRoute: TinhLuongRoute,
   TinhLuongGrossNetRoute: TinhLuongGrossNetRoute,
 }
 export const routeTree = rootRouteImport

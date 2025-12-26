@@ -91,20 +91,6 @@ export default function Header() {
             <span className="font-semibold text-white">Trang chủ</span>
           </Link>
 
-          <Link
-            to="/tinh-luong"
-            onClick={() => setIsOpen(false)}
-            className="flex items-center gap-3 p-4 rounded-xl hover:bg-white/10 transition-all duration-200 group border border-transparent hover:border-white/20"
-            activeProps={{
-              className:
-                'flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all duration-200 shadow-lg border border-white/20',
-            }}
-          >
-            <div className="p-2 bg-white/10 rounded-lg group-hover:bg-white/20 transition-colors">
-              <Calculator size={20} className="text-white" />
-            </div>
-            <span className="font-semibold text-white">Tính lương tối thiểu</span>
-          </Link>
 
           <Link
             to="/tinh-luong-gross-net"
