@@ -65,25 +65,38 @@ const TAX_BRACKETS_OLD: Array<TaxBracket> = [
 const GIAM_TRU_BAN_THAN_OLD = 11_000_000 // 11 triệu đồng/tháng
 const GIAM_TRU_NGUOI_PHU_THUOC_OLD = 4_400_000 // 4.4 triệu đồng/tháng/người
 
+/**
+ * Tính thuế thu nhập cá nhân theo biểu thuế lũy tiến từng phần
+ * 
+ * Công thức: Thuế = Σ (Phần thu nhập trong bậc × Thuế suất bậc)
+ * 
+ * Ví dụ với thu nhập 11,450,000:
+ * - Bậc 1 (0-10tr, 5%): 10,000,000 × 5% = 500,000
+ * - Bậc 2 (10-30tr, 10%): (11,450,000 - 10,000,000) × 10% = 145,000
+ * - Tổng thuế: 500,000 + 145,000 = 645,000
+ */
 function calculateTax(income: number, brackets: Array<TaxBracket>): number {
+  if (income <= 0) return 0
+
   let tax = 0
-  let remainingIncome = income
 
   for (const bracket of brackets) {
-    if (remainingIncome <= 0) break
+    // Nếu thu nhập nhỏ hơn hoặc bằng mức tối thiểu của bậc, không tính thuế ở bậc này
+    if (income <= bracket.min) break
 
-    const taxableInBracket = Math.min(
-      remainingIncome,
-      bracket.max === Infinity ? remainingIncome : bracket.max - bracket.min
-    )
+    // Xác định giới hạn trên của bậc (là thu nhập thực tế hoặc giới hạn tối đa của bậc)
+    const upperBound = bracket.max === Infinity ? income : Math.min(income, bracket.max)
+    
+    // Tính phần thu nhập nằm trong bậc này (từ min đến upperBound)
+    const taxableInBracket = upperBound - bracket.min
 
+    // Tính thuế cho phần thu nhập trong bậc này
     if (taxableInBracket > 0) {
       tax += taxableInBracket * bracket.rate
-      remainingIncome -= taxableInBracket
     }
   }
 
-  return tax
+  return Math.round(tax) // Làm tròn để tránh lỗi số thập phân
 }
 
 function TinhLuongGrossNetPage() {
