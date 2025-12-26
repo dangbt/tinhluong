@@ -1,0 +1,35 @@
+{
+  "short_name": "Tính Lương 2026",
+  "name": "Tính Lương 2026 - Công cụ tính lương Gross/Net theo chính sách mới",
+  "description": "Công cụ tính lương Gross/Net theo chính sách thuế TNCN mới từ 1/1/2026. So sánh lương cũ và mới, tính thuế thu nhập cá nhân, bảo hiểm xã hội, bảo hiểm y tế, bảo hiểm thất nghiệp.",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#9333ea",
+  "background_color": "#faf5ff",
+  "categories": ["finance", "business", "utilities", "productivity"],
+  "lang": "vi",
+  "dir": "ltr",
+  "prefer_related_applications": false
+}
