@@ -1,5 +1,5 @@
 name = "tinhluong"
-main=./dist/index.html
+main="./dist/index.html"
 compatibility_date = "2024-11-15"
 
 [assets]
