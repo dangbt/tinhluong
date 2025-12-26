@@ -1,5 +1,14 @@
 {
   "name": "tinhluong",
+  "version": "1.0.0",
+  "description": "Công cụ tính lương Gross/Net theo chính sách thuế TNCN mới từ 1/1/2026",
+  "author": "Tính Lương 2026",
+  "license": "MIT",
+  "homepage": "https://tinhluong.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tinhluong/tinhluong.git"
+  },
   "private": true,
   "type": "module",
   "scripts": {
