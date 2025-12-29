@@ -1,10 +1,11 @@
 import { Link } from '@tanstack/react-router'
 
 import { useState } from 'react'
-import { Calculator, DollarSign, FileText, Home, Menu, X } from 'lucide-react'
+import { Calculator, Coffee, DollarSign, FileText, Home, Menu, X } from 'lucide-react'
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
+  const BUY_ME_COFFEE_URL = 'https://buymeacoffee.com/dangbt' // Thay bằng URL BuyMeACoffee của bạn
 
   return (
     <>
@@ -36,6 +37,15 @@ export default function Header() {
           
           {/* Right side - có thể thêm user menu hoặc actions */}
           <div className="flex items-center gap-2">
+            <a
+              href={BUY_ME_COFFEE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden md:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 backdrop-blur-sm rounded-lg border border-amber-400/30 hover:from-amber-600 hover:to-orange-600 transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl"
+            >
+              <Coffee className="w-4 h-4" />
+              <span className="text-sm font-semibold">Buy me a coffee</span>
+            </a>
             <a
               href="https://xaydungchinhsach.chinhphu.vn/chinh-sach-noi-bat-ve-tien-luong-giam-thue-bang-gia-dat-co-hieu-luc-tu-1-1-2026-11925122411395028.htm"
               target="_blank"
@@ -107,7 +117,19 @@ export default function Header() {
             <span className="font-semibold text-white">Tính lương Gross/Net</span>
           </Link>
 
-          <div className="pt-4 mt-4 border-t border-white/10">
+          <div className="pt-4 mt-4 border-t border-white/10 space-y-2">
+            <a
+              href={BUY_ME_COFFEE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 transition-all duration-200 group border border-amber-400/30 hover:border-amber-400/50"
+            >
+              <div className="p-2 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg group-hover:from-amber-600 group-hover:to-orange-600 transition-colors shadow-lg">
+                <Coffee size={20} className="text-white" />
+              </div>
+              <span className="font-semibold text-white">Buy me a coffee</span>
+            </a>
             <a
               href="https://xaydungchinhsach.chinhphu.vn/chinh-sach-noi-bat-ve-tien-luong-giam-thue-bang-gia-dat-co-hieu-luc-tu-1-1-2026-11925122411395028.htm"
               target="_blank"
