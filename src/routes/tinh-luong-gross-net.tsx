@@ -42,16 +42,8 @@ interface TaxBracket {
   rate: number
 }
 
-const TAX_BRACKETS_2026: Array<TaxBracket> = [
-  { min: 0, max: 10_000_000, rate: 0.05 }, // Đến 10 triệu: 5%
-  { min: 10_000_000, max: 30_000_000, rate: 0.1 }, // Trên 10 đến 30 triệu: 10%
-  { min: 30_000_000, max: 60_000_000, rate: 0.2 }, // Trên 30 đến 60 triệu: 20%
-  { min: 60_000_000, max: 100_000_000, rate: 0.3 }, // Trên 60 đến 100 triệu: 30%
-  { min: 100_000_000, max: Infinity, rate: 0.35 }, // Trên 100 triệu: 35%
-]
-
-// Biểu thuế cũ (để so sánh)
-const TAX_BRACKETS_OLD: Array<TaxBracket> = [
+// Biểu thuế 2025 (Hiện hành - 7 bậc chuẩn)
+const TAX_BRACKETS_2025: Array<TaxBracket> = [
   { min: 0, max: 5_000_000, rate: 0.05 },
   { min: 5_000_000, max: 10_000_000, rate: 0.1 },
   { min: 10_000_000, max: 18_000_000, rate: 0.15 },
@@ -60,6 +52,20 @@ const TAX_BRACKETS_OLD: Array<TaxBracket> = [
   { min: 52_000_000, max: 80_000_000, rate: 0.3 },
   { min: 80_000_000, max: Infinity, rate: 0.35 },
 ]
+
+// Biểu thuế 2026 (Đề xuất - Giãn cách rộng hơn)
+const TAX_BRACKETS_2026: Array<TaxBracket> = [
+  { min: 0, max: 10_000_000, rate: 0.05 }, // Đến 10 triệu: 5%
+  { min: 10_000_000, max: 20_000_000, rate: 0.1 }, // Trên 10 đến 20 triệu: 10%
+  { min: 20_000_000, max: 35_000_000, rate: 0.15 }, // Trên 20 đến 35 triệu: 15%
+  { min: 35_000_000, max: 60_000_000, rate: 0.2 }, // Trên 35 đến 60 triệu: 20%
+  { min: 60_000_000, max: 90_000_000, rate: 0.25 }, // Trên 60 đến 90 triệu: 25%
+  { min: 90_000_000, max: 120_000_000, rate: 0.3 }, // Trên 90 đến 120 triệu: 30%
+  { min: 120_000_000, max: Infinity, rate: 0.35 }, // Trên 120 triệu: 35%
+]
+
+// Biểu thuế cũ (để so sánh) - Alias to 2025
+const TAX_BRACKETS_OLD = TAX_BRACKETS_2025
 
 // Mức giảm trừ cũ
 const GIAM_TRU_BAN_THAN_OLD = 11_000_000 // 11 triệu đồng/tháng
@@ -326,11 +332,10 @@ function TinhLuongGrossNetPage() {
                         <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
                           <p className="text-sm text-gray-600 mb-1">Chênh lệch</p>
                           <p
-                            className={`text-2xl font-bold ${
-                              calculations.netSalary - calculationsOld.netSalary >= 0
-                                ? 'text-green-600'
-                                : 'text-red-600'
-                            }`}
+                            className={`text-2xl font-bold ${calculations.netSalary - calculationsOld.netSalary >= 0
+                              ? 'text-green-600'
+                              : 'text-red-600'
+                              }`}
                           >
                             {calculations.netSalary - calculationsOld.netSalary >= 0 ? '+' : ''}
                             {formatCurrency(calculations.netSalary - calculationsOld.netSalary)}
@@ -506,11 +511,10 @@ function TinhLuongGrossNetPage() {
                               <div className="flex justify-between">
                                 <span className="text-sm">Lương Net:</span>
                                 <span
-                                  className={`font-semibold ${
-                                    calculations.netSalary - calculationsOld.netSalary >= 0
-                                      ? 'text-green-600'
-                                      : 'text-red-600'
-                                  }`}
+                                  className={`font-semibold ${calculations.netSalary - calculationsOld.netSalary >= 0
+                                    ? 'text-green-600'
+                                    : 'text-red-600'
+                                    }`}
                                 >
                                   {calculations.netSalary - calculationsOld.netSalary >= 0 ? '+' : ''}
                                   {formatCurrency(
@@ -521,11 +525,10 @@ function TinhLuongGrossNetPage() {
                               <div className="flex justify-between">
                                 <span className="text-sm">Thuế TNCN:</span>
                                 <span
-                                  className={`font-semibold ${
-                                    calculations.thueTNCN - calculationsOld.thueTNCN <= 0
-                                      ? 'text-green-600'
-                                      : 'text-red-600'
-                                  }`}
+                                  className={`font-semibold ${calculations.thueTNCN - calculationsOld.thueTNCN <= 0
+                                    ? 'text-green-600'
+                                    : 'text-red-600'
+                                    }`}
                                 >
                                   {calculations.thueTNCN - calculationsOld.thueTNCN <= 0 ? '' : '+'}
                                   {formatCurrency(
@@ -552,55 +555,97 @@ function TinhLuongGrossNetPage() {
         </div>
 
         {/* Thông tin về biểu thuế */}
-        <Card>
+        {/* Thông tin về biểu thuế - Side-by-Side Comparison */}
+        <Card className="mt-6">
           <CardHeader>
-            <CardTitle>Biểu thuế TNCN mới từ 1/1/2026</CardTitle>
+            <CardTitle>So sánh Biểu thuế TNCN</CardTitle>
+            <CardDescription>
+              So sánh mức tính thuế giữa quy định hiện hành (2025) và đề xuất mới (2026)
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border p-3 text-left">Bậc</th>
-                    <th className="border p-3 text-left">Thu nhập tính thuế/tháng</th>
-                    <th className="border p-3 text-left">Thuế suất</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {TAX_BRACKETS_2026.map((bracket, index) => (
-                    <tr key={index} className="hover:bg-gray-50">
-                      <td className="border p-3 font-medium">{index + 1}</td>
-                      <td className="border p-3">
-                        {bracket.min === 0
-                          ? `Đến ${formatCurrency(bracket.max)}`
-                          : bracket.max === Infinity
-                            ? `Trên ${formatCurrency(bracket.min)}`
-                            : `Trên ${formatCurrency(bracket.min)} đến ${formatCurrency(bracket.max)}`}
-                      </td>
-                      <td className="border p-3 font-semibold">{(bracket.rate * 100).toFixed(0)}%</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Bảng 2025 */}
+              <div>
+                <h3 className="font-semibold text-lg text-gray-700 mb-3 flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-gray-500"></span>
+                  Biểu thuế 2025 (Hiện hành)
+                </h3>
+                <div className="overflow-x-auto border rounded-lg">
+                  <table className="w-full border-collapse text-sm">
+                    <thead>
+                      <tr className="bg-gray-100">
+                        <th className="border-b p-2 text-left w-12">Bậc</th>
+                        <th className="border-b p-2 text-left">Thu nhập tính thuế/tháng</th>
+                        <th className="border-b p-2 text-left w-20">Thuế suất</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {TAX_BRACKETS_2025.map((bracket, index) => (
+                        <tr key={index} className="hover:bg-gray-50 border-b last:border-0">
+                          <td className="p-2 text-center text-gray-500">{index + 1}</td>
+                          <td className="p-2">
+                            {bracket.min === 0
+                              ? `Đến ${formatCurrency(bracket.max)}`
+                              : bracket.max === Infinity
+                                ? `Trên ${formatCurrency(bracket.min)}`
+                                : `Trên ${formatCurrency(bracket.min)} đến ${formatCurrency(bracket.max)}`}
+                          </td>
+                          <td className="p-2 font-medium">{(bracket.rate * 100).toFixed(0)}%</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Bảng 2026 */}
+              <div>
+                <h3 className="font-semibold text-lg text-green-700 mb-3 flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                  Biểu thuế 2026 (Đề xuất mới)
+                </h3>
+                <div className="overflow-x-auto border rounded-lg border-green-200">
+                  <table className="w-full border-collapse text-sm">
+                    <thead>
+                      <tr className="bg-green-50">
+                        <th className="border-b border-green-200 p-2 text-left w-12">Bậc</th>
+                        <th className="border-b border-green-200 p-2 text-left">Thu nhập tính thuế/tháng</th>
+                        <th className="border-b border-green-200 p-2 text-left w-20">Thuế suất</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {TAX_BRACKETS_2026.map((bracket, index) => (
+                        <tr key={index} className="hover:bg-green-50/50 border-b border-green-100 last:border-0">
+                          <td className="p-2 text-center text-gray-500">{index + 1}</td>
+                          <td className="p-2">
+                            {bracket.min === 0
+                              ? `Đến ${formatCurrency(bracket.max)}`
+                              : bracket.max === Infinity
+                                ? `Trên ${formatCurrency(bracket.min)}`
+                                : `Trên ${formatCurrency(bracket.min)} đến ${formatCurrency(bracket.max)}`}
+                          </td>
+                          <td className="p-2 font-medium text-green-700">{(bracket.rate * 100).toFixed(0)}%</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
 
-            <div className="mt-6 space-y-4">
+            <div className="mt-8 space-y-4">
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h3 className="font-semibold mb-2">Mức giảm trừ gia cảnh mới (từ 1/1/2026):</h3>
-                <ul className="list-disc list-inside space-y-1 text-sm">
-                  <li>Giảm trừ cho bản thân: {formatCurrency(GIAM_TRU_BAN_THAN)}/tháng</li>
-                  <li>
-                    Giảm trừ cho mỗi người phụ thuộc: {formatCurrency(GIAM_TRU_NGUOI_PHU_THUOC)}
-                    /tháng
-                  </li>
+                <h3 className="font-semibold mb-2 text-blue-800">Điểm nổi bật của đề xuất mới (2026):</h3>
+                <ul className="list-disc list-inside space-y-1 text-sm text-blue-900">
+                  <li><strong>Nới rộng khoảng cách các bậc thuế:</strong> Giúp giảm số thuế phải đóng cho cùng một mức thu nhập.</li>
+                  <li><strong>Mức giảm trừ gia cảnh tăng:</strong> Bản thân {formatCurrency(GIAM_TRU_BAN_THAN)} (so với 11tr), Người phụ thuộc {formatCurrency(GIAM_TRU_NGUOI_PHU_THUOC)} (so với 4.4tr).</li>
                 </ul>
               </div>
 
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                 <p className="text-sm text-yellow-800">
-                  <strong>Lưu ý:</strong> Công thức tính trên chỉ mang tính chất tham khảo. Kết quả
-                  thực tế có thể khác do các khoản phụ cấp, thưởng và các quy định cụ thể khác. Vui
-                  lòng tham khảo ý kiến chuyên gia hoặc cơ quan thuế để có thông tin chính xác nhất.
+                  <strong>Lưu ý:</strong> Đây là công cụ mô phỏng dựa trên các đề xuất thay đổi luật Thuế TNCN. Các con số chính thức có thể thay đổi khi luật được thông qua.
                 </p>
               </div>
             </div>

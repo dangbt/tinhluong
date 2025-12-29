@@ -1,11 +1,12 @@
 import { Link } from '@tanstack/react-router'
 
 import { useState } from 'react'
-import { Calculator, Coffee, DollarSign, FileText, Home, Menu, X } from 'lucide-react'
+import { Calculator, Coffee, DollarSign, FileText, Heart, Home, Menu, X } from 'lucide-react'
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
   const BUY_ME_COFFEE_URL = 'https://buymeacoffee.com/dangbt' // Thay bằng URL BuyMeACoffee của bạn
+  const GITHUB_SPONSORS_URL = 'https://github.com/sponsors/tinhluong' // Thay bằng URL GitHub Sponsors của bạn
 
   return (
     <>
@@ -37,6 +38,15 @@ export default function Header() {
           
           {/* Right side - có thể thêm user menu hoặc actions */}
           <div className="flex items-center gap-2">
+            <a
+              href={GITHUB_SPONSORS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden md:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-500 to-rose-500 backdrop-blur-sm rounded-lg border border-pink-400/30 hover:from-pink-600 hover:to-rose-600 transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl"
+            >
+              <Heart className="w-4 h-4 fill-white" />
+              <span className="text-sm font-semibold">Sponsor</span>
+            </a>
             <a
               href={BUY_ME_COFFEE_URL}
               target="_blank"
@@ -118,6 +128,18 @@ export default function Header() {
           </Link>
 
           <div className="pt-4 mt-4 border-t border-white/10 space-y-2">
+            <a
+              href={GITHUB_SPONSORS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-pink-500/20 to-rose-500/20 hover:from-pink-500/30 hover:to-rose-500/30 transition-all duration-200 group border border-pink-400/30 hover:border-pink-400/50"
+            >
+              <div className="p-2 bg-gradient-to-br from-pink-500 to-rose-500 rounded-lg group-hover:from-pink-600 group-hover:to-rose-600 transition-colors shadow-lg">
+                <Heart size={20} className="text-white fill-white" />
+              </div>
+              <span className="font-semibold text-white">GitHub Sponsor</span>
+            </a>
             <a
               href={BUY_ME_COFFEE_URL}
               target="_blank"
