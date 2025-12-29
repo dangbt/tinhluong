@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { NumberInput } from '@/components/ui/number-input'
 import { Label } from '@/components/ui/label'
 import {
   Select,
@@ -256,13 +257,11 @@ function TinhLuongGrossNetPage() {
                 <Label htmlFor="salaryAmount">
                   {salaryType === 'gross' ? 'Lương Gross' : 'Lương Net'} (đồng)
                 </Label>
-                <Input
+                <NumberInput
                   id="salaryAmount"
-                  type="number"
                   value={salaryAmount}
-                  onChange={(e) => setSalaryAmount(e.target.value)}
+                  onChange={setSalaryAmount}
                   placeholder="Nhập số tiền"
-                  min="0"
                 />
               </div>
 

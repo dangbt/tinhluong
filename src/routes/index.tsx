@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { NumberInput } from '@/components/ui/number-input'
 import { Label } from '@/components/ui/label'
 import {
   Select,
@@ -391,13 +392,11 @@ function TinhLuongGrossNetPage() {
                 <Label htmlFor="salaryAmount">
                   {salaryType === 'gross' ? 'Lương Gross' : 'Lương Net'} (đồng)
                 </Label>
-                <Input
+                <NumberInput
                   id="salaryAmount"
-                  type="number"
                   value={salaryAmount}
-                  onChange={(e) => setSalaryAmount(e.target.value)}
+                  onChange={setSalaryAmount}
                   placeholder="Nhập số tiền"
-                  min="0"
                 />
               </div>
 
@@ -457,17 +456,15 @@ function TinhLuongGrossNetPage() {
                           ? 'Lương chính thức (đồng)'
                           : 'Tổng số tiền đóng bảo hiểm (đồng)'}
                       </Label>
-                      <Input
+                      <NumberInput
                         id="customInsuranceAmount"
-                        type="number"
                         value={customInsuranceAmount}
-                        onChange={(e) => setCustomInsuranceAmount(e.target.value)}
+                        onChange={setCustomInsuranceAmount}
                         placeholder={
                           insuranceOnOfficialSalary
                             ? 'Nhập lương chính thức'
                             : 'Nhập tổng số tiền bảo hiểm'
                         }
-                        min="0"
                       />
                       <p className="text-xs text-gray-500">
                         {insuranceOnOfficialSalary
